@@ -5,7 +5,6 @@ import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.receiver.Receiver
 import org.apache.spark.streaming.{Seconds, StreamingContext}
-import scala.concurrent.ExecutionContext.Implicits.global
 import java.net.Socket
 import scala.concurrent.{Future, Promise}
 import scala.io.Source
@@ -15,6 +14,7 @@ class CustomSocketReceiver(host: String, port: Int) extends Receiver[String](Sto
   // in production level "MEMORY_AND_DISK_2" we need to use because if some how data is not save in
   // memory then all data will save in 'DISK' and replicated twice. '2' means replicated data twice so you
   // don't loose data in cluster.
+  import scala.concurrent.ExecutionContext.Implicits.global
 
   val socketPromise: Promise[Socket] = Promise[Socket]()
   val socketFuture = socketPromise.future
