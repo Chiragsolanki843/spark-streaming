@@ -11,6 +11,7 @@ import scala.io.Source
 
 class CustomSocketReceiver(host: String, port: Int) extends Receiver[String](StorageLevel.MEMORY_ONLY) {
 
+
   // in production level "MEMORY_AND_DISK_2" we need to use because if some how data is not save in
   // memory then all data will save in 'DISK' and replicated twice. '2' means replicated data twice so you
   // don't loose data in cluster.
@@ -21,7 +22,6 @@ class CustomSocketReceiver(host: String, port: Int) extends Receiver[String](Sto
 
   // called asynchronously
   override def onStart(): Unit = {
-
     val socket = new Socket(host, port)
 
     // run on another thread
@@ -41,7 +41,7 @@ class CustomSocketReceiver(host: String, port: Int) extends Receiver[String](Sto
 object CustomReceiverApp {
 
   val spark = SparkSession.builder()
-    .appName("Customer receiver app")
+    .appName("Custom receiver app")
     .master("local[*]")
     .getOrCreate()
 
@@ -50,10 +50,10 @@ object CustomReceiverApp {
   val ssc = new StreamingContext(spark.sparkContext, Seconds(1))
 
   def main(args: Array[String]): Unit = {
-
     val dataStream: DStream[String] = ssc.receiverStream(new CustomSocketReceiver("localhost", 12345))
     dataStream.print()
     ssc.start()
     ssc.awaitTermination()
   }
+
 }

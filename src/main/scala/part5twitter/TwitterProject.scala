@@ -17,12 +17,12 @@ object TwitterProject {
   val ssc = new StreamingContext(spark.sparkContext, Seconds(1))
 
   def readTwitter(): Unit = {
-
     val twitterStream: DStream[Status] = ssc.receiverStream(new TwitterReceiver)
     val tweets: DStream[String] = twitterStream.map { status =>
       val username = status.getUser.getName
       val followers = status.getUser.getFollowersCount
       val text = status.getText
+
       s"User $username ($followers followers) says: $text"
     }
 
