@@ -12,7 +12,7 @@ class TwitterReceiver extends Receiver[Status](StorageLevel.MEMORY_ONLY) {
   val twitterStreamPromise = Promise[TwitterStream]
   val twitterStreamFuture = twitterStreamPromise.future
 
-  private def simpleStatusListener = new StatusListener {
+  def simpleStatusListener = new StatusListener {
     override def onStatus(status: Status): Unit = store(status)
     override def onDeletionNotice(statusDeletionNotice: StatusDeletionNotice): Unit = ()
     override def onTrackLimitationNotice(numberOfLimitedStatuses: Int): Unit = ()
@@ -23,7 +23,7 @@ class TwitterReceiver extends Receiver[Status](StorageLevel.MEMORY_ONLY) {
 
   // run asynchronously
   override def onStart(): Unit = {
-    val twitterStream: TwitterStream = new TwitterStreamFactory("src/main/resources")
+    val twitterStream: TwitterStream = new TwitterStreamFactory("src/main/resources/")
       .getInstance()
       .addListener(simpleStatusListener)
       .sample("en") // call the Twitter sample endpoint for English tweets
@@ -36,5 +36,4 @@ class TwitterReceiver extends Receiver[Status](StorageLevel.MEMORY_ONLY) {
     twitterStream.cleanUp()
     twitterStream.shutdown()
   }
-
 }
