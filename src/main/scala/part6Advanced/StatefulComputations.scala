@@ -95,6 +95,6 @@ object StatefulComputations {
 
   def main(args: Array[String]): Unit = {
     getAveragePostStorage()
-  }
 
+  }
 }
