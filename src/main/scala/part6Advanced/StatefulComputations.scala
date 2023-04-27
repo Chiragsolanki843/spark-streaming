@@ -80,15 +80,20 @@ object StatefulComputations {
     val regularSqlAveragePostType = socialStream
       .groupByKey(_.postType)
       .agg(sum(col("count")).as("totalCount").as[Int], sum(col("storageUsed")).as("totalStorage").as[Int])
-      .selectExpr("postType", "totalStorage/totalCount as avgStorage")
+      .selectExpr("key as postType", "totalStorage/totalCount as avgStorage")
 
     val averageByPostType = socialStream
       .groupByKey(_.postType)
       .mapGroupsWithState(GroupStateTimeout.NoTimeout())(updateAverageStorage)
+    // GroupStateTimeout.NoTimeout() record will come late then it will not count in stream.
+    // is working as 'watermark'
 
     averageByPostType.writeStream
       .format("console")
       .outputMode("update") // append not supported on mapGroupWithState
+      // if console format is not supported in update mode then we need to use below code.
+      // .foreachBatch { (batch:Dataset[AveragePostStorage], _:Long) =>
+      //  batch.show() } then remove ".format("console")"
       .start()
       .awaitTermination()
   }
@@ -98,3 +103,13 @@ object StatefulComputations {
 
   }
 }
+
+/*
+text,3,3000
+text,4,5000
+video,1,500000
+audio,3,60000
+text,1,2500
+
+average for text = 10500 / 8 = 1312.5
+ */
